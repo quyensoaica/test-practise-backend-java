@@ -56,19 +56,40 @@ public class Category {
     @Column(name = "levelId", length = 255, nullable = false)
     private String levelId;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "skillId", referencedColumnName = "id", insertable = false, updatable = false)
     private Skill skill;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "levelId", referencedColumnName = "id", insertable = false, updatable = false)
     private Level level;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 
-    // Getters and Setters
 
+    public Category() {
+    }
+
+    public Category(String id, String name, String description, String image, boolean isDeleted, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, String skillId, String levelId, Skill skill, Level level, List<Question> questions) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.image = image;
+        this.isDeleted = isDeleted;
+        this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+        this.skillId = skillId;
+        this.levelId = levelId;
+        this.skill = skill;
+        this.level = level;
+        this.questions = questions;
+    }
+
+    // Getters and Setters
     public String getId() {
         return id;
     }
