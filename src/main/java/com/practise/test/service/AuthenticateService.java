@@ -64,7 +64,7 @@ public class AuthenticateService {
             }
 
             return new AppResponseBase(
-                    200,
+                     200,
                     true,
                     "Get user by email success",
                     user,
@@ -172,7 +172,13 @@ public class AuthenticateService {
             ModelMapper modelMapper = new ModelMapper();
             UserInfo userInfo = modelMapper.map(user, UserInfo.class);
 
-            TokenPayload tokenPayload = new TokenPayload(user.getId(), user.getGroupRoleId(), user.getUsername(), user.getFullName());
+            GroupRole groupRole = user.getGroupRole();
+            TokenPayload tokenPayload = new TokenPayload(
+                    user.getId(),
+                    user.getUsername(),
+                    user.getGroupRoleId(),
+                    groupRole.getName()
+            );
             AccessToken token = jwtService.generateToken(tokenPayload);
             LoginReponseDTO loginReponseDTO = new LoginReponseDTO(
                     token,

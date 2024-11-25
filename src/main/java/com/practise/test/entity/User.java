@@ -1,15 +1,21 @@
 package com.practise.test.entity;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
+//@Getter
+//@Setter
+//@AllArgsConstructor
+
+
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "id"
@@ -52,12 +58,15 @@ public class User {
     private String banner;
 
     @Column(name = "isBlocked", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @JsonProperty("isBlocked")
     private boolean isBlocked = false;
 
     @Column(name = "isDeleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @JsonProperty("isDeleted")
     private boolean isDeleted = false;
 
     @Column(name = "isUpdated", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @JsonProperty("isUpdated")
     private boolean isUpdated = false;
 
     @CreationTimestamp
@@ -228,4 +237,6 @@ public class User {
     public void setGroupRole(GroupRole groupRole) {
         this.groupRole = groupRole;
     }
+
+
 }

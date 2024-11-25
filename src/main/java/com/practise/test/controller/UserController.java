@@ -5,45 +5,53 @@ import com.practise.test.dto.UserDTO;
 import com.practise.test.entity.User;
 import com.practise.test.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-//    private UserService userService;
+
     @Autowired
     private UserService userService;
 
-    @PostMapping()
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO) {
-        UserDTO user = userService.createUser(userDTO);
-        return ResponseEntity.status(HttpStatus.OK).body(
-                user
-        );
+    @GetMapping("/get-users")
+    public ResponseEntity<Map<String, Object>> getAllUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int limit,
+            @RequestParam(defaultValue = "") String search) {
+        Map<String, Object> response = userService.getAllUsers(page, limit, search);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("status", 200);
+        result.put("success", true);
+        result.put("message", null);
+        result.put("data", response);
+        result.put("error", null);
+
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.status(HttpStatus.OK).body(user);
+    @PostMapping("/create-user")
+    public Map<String, Object> createUser(@RequestBody User user) {
+        return userService.createUser(user);  // Trả về trực tiếp kết quả từ service
     }
-    @CrossOrigin
-    @GetMapping("")
-    public ResponseEntity<AppResponseBase> getListUser() {
 
-        List<User> listUser = userService.getAllUser();
+    @PutMapping("/update-user/{userId}")
+    public Map<String, Object> updateUser(@PathVariable String userId, @RequestBody User data1) {
+        return userService.updateUser(userId, data1);
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new AppResponseBase(
-                    200,
-                    true,
-                    "Oke",
-                    listUser,
-                    null
-                )
-        );
+    @DeleteMapping("/delete-user/{userId}")
+    public Map<String, Object> deleteUser(@PathVariable String userId) {
+        return userService.deleteUser(userId);
     }
 }
+
