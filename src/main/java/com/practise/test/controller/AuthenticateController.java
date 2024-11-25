@@ -4,6 +4,7 @@ import com.practise.test.dto.AppData.AppResponseBase;
 import com.practise.test.dto.authorization.LoginReponseDTO;
 import com.practise.test.dto.authorization.LoginRequestDTO;
 import com.practise.test.dto.authorization.RegisterRequestDTO;
+import com.practise.test.dto.authorization.UpdateMyProfileRequestDTO;
 import com.practise.test.model.authorization.AccessToken;
 import com.practise.test.model.authorization.TokenPayload;
 import com.practise.test.service.AuthenticateService;
@@ -61,5 +62,9 @@ public class AuthenticateController {
         return ResponseEntity.status(200).body(new AppResponseBase(200, verifyToken, "Verify token", verifyToken, null));
     }
 
-
+    @PutMapping("/update-my-profile")
+    ResponseEntity<AppResponseBase> updateMyProfile(@RequestBody UpdateMyProfileRequestDTO updateMyProfileRequestDTO, @RequestAttribute("userId") String userId) {
+        AppResponseBase appResponseBase = authenticateService.updateMyProfile(userId, updateMyProfileRequestDTO);
+        return ResponseEntity.status(appResponseBase.getStatus()).body(appResponseBase);
+    }
 }

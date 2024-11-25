@@ -17,7 +17,7 @@ public class Level {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "skillId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "skillId", length = 255, nullable = false)
     private String skillId;
 
     @Column(name = "name", length = 255, nullable = false)
@@ -35,14 +35,14 @@ public class Level {
     @Column(name = "subQuestionNumber", nullable = false, columnDefinition = "integer default 0")
     private int subQuestionNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "skillId", referencedColumnName = "id", insertable = false, updatable = false)
     private Skill skill;
 
-    @OneToMany(mappedBy = "level", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "level", fetch = FetchType.EAGER)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "level", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "level", fetch = FetchType.EAGER)
     private List<Question> questions;
 
     public Level() {
