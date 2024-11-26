@@ -34,7 +34,7 @@ public class Category {
     private boolean isDeleted = false;
 
     @Column(name = "isActive", nullable = true, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private Boolean isActive = true;
+    private boolean isActive = true;
 
     @CreationTimestamp
     @Column(name = "createdAt", nullable = false, updatable = false)
@@ -71,7 +71,7 @@ public class Category {
     public Category() {
     }
 
-    public Category(String id, String name, String description, String image, boolean isDeleted, Boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, String skillId, String levelId, Skill skill, Level level, List<Question> questions) {
+    public Category(String id, String name, String description, String image, boolean isDeleted, boolean isActive, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy, String skillId, String levelId, Skill skill, Level level, List<Question> questions) {
         this.id = id;
         this.name = name;
         this.description = description;

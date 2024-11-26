@@ -1,4 +1,4 @@
 package com.practise.test.repository;
 
-public class ExamQuestionRepository {
+public interface ExamQuestionRepository {
 }
