@@ -19,7 +19,7 @@ public class ExamSchedule {
     @Column(name = "examPeriod", length = 255, nullable = false)
     private String examPeriod;
 
-    @Column(name = "organizationId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "organizationId", length = 255, nullable = false)
     private String organizationId;
 
     @Column(name = "description", columnDefinition = "TEXT", nullable = true)

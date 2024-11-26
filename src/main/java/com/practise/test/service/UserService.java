@@ -5,6 +5,7 @@ import com.practise.test.entity.GroupRole;
 import com.practise.test.entity.User;
 import com.practise.test.repository.GroupRoleRepository;
 import com.practise.test.repository.UserRepository;
+import com.practise.test.utils.PasswordHandle;
 import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,10 +100,11 @@ public class UserService {
 
     public Map<String, Object> createUser(User user) {
         Map<String, Object> response = new HashMap<>();
-
+    try
+    {
         // Kiểm tra tài khoản đã tồn tại
-        User existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser != null) {
+        Optional<User> existingUser = Optional.ofNullable(userRepository.findByUsername(user.getUsername()));
+        if (existingUser.isPresent()) {
             response.put("status", 409);
             response.put("success", false);
             response.put("message", "Tài khoản đã tồn tại trên hệ thống");
@@ -125,18 +127,50 @@ public class UserService {
         // Tạo ID mới và lưu người dùng
         user.setId(UUID.randomUUID().toString());
         user.setGroupRole(groupRole.get());  // Gán thông tin phân quyền
-
+        user.setPassword(PasswordHandle.hashPassword(user.getPassword()));
+        user.setCreatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         // Lưu vào DB
         User createdUser = userRepository.save(user);
 
-        // Trả về dữ liệu theo yêu cầu
-        response.put("status", 201);
+        Map<String, Object> userData = new HashMap<>();
+
+        userData.put("id", user.getId());
+        userData.put("username", user.getUsername());
+        userData.put("email", user.getEmail());
+        userData.put("fullName", user.getFullName());
+        userData.put("groupRoleId", user.getGroupRoleId());
+        userData.put("phoneNumber", user.getPhoneNumber());
+        userData.put("birthday", user.getBirthday());
+        userData.put("gender", user.getGender());
+        userData.put("avatar", user.getAvatar());
+        userData.put("banner", user.getBanner());
+        userData.put("isBlocked", user.isBlocked());
+        userData.put("isDeleted", user.isDeleted());
+        userData.put("isUpdated", user.isUpdated());
+        userData.put("createdAt", user.getCreatedAt());
+        userData.put("updatedAt", user.getUpdatedAt());
+
+        // Thêm thông tin groupRole vào
+        Map<String, Object> groupRoleData = new HashMap<>();
+        groupRoleData.put("name", groupRole.get().getName());
+        groupRoleData.put("displayName", groupRole.get().getDisplayName());
+        userData.put("groupRole", groupRoleData);
+        response.put("status", 200);
         response.put("success", true);
         response.put("message", null);
-        response.put("data", createdUser);
+        response.put("data", userData);
         response.put("error", null);
-
         return response;
+    }
+        catch (Exception e) {
+        response.put("status", 500);
+        response.put("success", false);
+        response.put("message", "Lỗi them moi  người dùng");
+        response.put("data", null);
+        response.put("error", e.getMessage());
+        return response;
+    }
     }
 
     public Map<String, Object> updateUser(String userId, User data1) {
@@ -207,7 +241,8 @@ public class UserService {
             response.put("error", null);
             return response;
 
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             response.put("status", 500);
             response.put("success", false);
             response.put("message", "Lỗi cập nhật người dùng");
