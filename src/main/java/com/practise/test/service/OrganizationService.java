@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,11 +28,23 @@ public class OrganizationService {
         try {
             List<Organization> organizations = organizationRepository.findAll();
 
-            response.put("data", organizations);
+            List<Map<String, Object>> orgdata = organizations.stream()
+                    .map(org -> {
+                Map<String, Object> data = new LinkedHashMap<>();
+                        data.put("id", org.getId());
+                        data.put("name", org.getName());
+                        data.put("description", org.getDescription());
+                        data.put("createdAt", org.getCreatedAt());
+                        data.put("updatedAt", org.getUpdatedAt());
+                return data;
+            }).collect(Collectors.toList());
+
+            response.put("data", orgdata);
             response.put("error", null);
             response.put("message", "Get all organizations successfully");
             response.put("success", true);
             response.put("status", 200);
+
         } catch (Exception e) {
             response.put("data", null);
             response.put("message", "Internal server error");
@@ -43,34 +56,58 @@ public class OrganizationService {
         return response;
     }
 
-    public Map<String, Object> createOrganization(Organization organization) {
+    public Map<String, Object> createOrganization(Organization data) {
         Map<String, Object> response = new HashMap<>();
 
-        // Kiểm tra tổ chức đã tồn tại
-        Organization existingOrg = organizationRepository.findByName(organization.getName());
-        if (existingOrg != null) {
-            response.put("status", 409);
-            response.put("success", false);
-            response.put("message", "Tổ chức đã tồn tại trên hệ thống");
-            response.put("data", null);
-            response.put("error", "Conflict");
+        try {
+            // Kiểm tra tên tổ chức
+            if (data.getName() == null || data.getName().isEmpty()) {
+                response.put("data", null);
+                response.put("message", "Name is required");
+                response.put("success", false);
+                response.put("error", Map.of("message", "Name is required", "errorDetail", "Name is required"));
+                response.put("status", HttpStatus.BAD_REQUEST.value());
+                return response;
+            }
+
+            // Tạo ID mới
+            data.setId(UUID.randomUUID().toString());
+            // Lưu tổ chức vào cơ sở dữ liệu
+            Organization organization = organizationRepository.save(data);
+
+            // Tìm lại tổ chức đã lưu
+            Optional<Organization> createdOrganization = organizationRepository.findById(data.getId());
+            if (!createdOrganization.isPresent()) {
+                response.put("data", null);
+                response.put("message", "Create organization failed");
+                response.put("success", false);
+                response.put("error", Map.of("message", "Create organization failed", "errorDetail", "Create organization failed"));
+                response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+                return response;
+            }
+
+            // Trả về tổ chức đã tạo thành công
+            Map<String, Object> orgData = new HashMap<>();
+            orgData.put("id", organization.getId());
+            orgData.put("name", organization.getName());
+            orgData.put("description", organization.getDescription());
+            orgData.put("createdAt", organization.getCreatedAt());
+            orgData.put("updatedAt", organization.getUpdatedAt());
+
+            response.put("status", 201);
+            response.put("success", true);
+            response.put("message", "Create organ successfully");
+            response.put("data", orgData);
+            response.put("error", null);
             return response;
+
+        } catch (Exception e) {
+            response.put("data", null);
+            response.put("message", "Internal Server Error");
+            response.put("success", false);
+            response.put("error", Map.of("message", e.getMessage(), "errorDetail", e.getMessage()));
+            response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
-
-        // Tạo ID mới và lưu tổ chức
-        organization.setId(UUID.randomUUID().toString());
-        organization.setCreatedAt(LocalDateTime.now());
-        organization.setUpdatedAt(LocalDateTime.now());
-
-        // Lưu vào DB
-        Organization createdOrg = organizationRepository.save(organization);
-
-        // Trả về dữ liệu theo yêu cầu
-        response.put("status", 201);
-        response.put("success", true);
-        response.put("message", null);
-        response.put("data", createdOrg);
-        response.put("error", null);
 
         return response;
     }
