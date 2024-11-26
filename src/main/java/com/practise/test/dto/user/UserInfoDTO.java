@@ -1,5 +1,6 @@
 package com.practise.test.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.practise.test.entity.GroupRole;
 import com.practise.test.model.role.GroupRoleInfo;
 
@@ -14,7 +15,9 @@ public class UserInfoDTO {
     private String gender;
     private String avatar;
     private String banner;
+    @JsonProperty("isBlocked")
     private boolean isBlocked;
+    @JsonProperty("isUpdated")
     private boolean isUpdated;
     private GroupRoleInfo groupRole;
 
@@ -117,18 +120,22 @@ public class UserInfoDTO {
         this.banner = banner;
     }
 
+    @JsonProperty("isBlocked")
     public boolean isBlocked() {
         return isBlocked;
     }
 
+    @JsonProperty("isBlocked")
     public void setBlocked(boolean blocked) {
         isBlocked = blocked;
     }
 
+    @JsonProperty("isUpdated")
     public boolean isUpdated() {
         return isUpdated;
     }
 
+    @JsonProperty("isUpdated")
     public void setUpdated(boolean updated) {
         isUpdated = updated;
     }

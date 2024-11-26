@@ -3,10 +3,7 @@ package com.practise.test.service;
 import com.practise.test.constants.EGroupRole;
 import com.practise.test.dto.AppData.AppErrorBase;
 import com.practise.test.dto.AppData.AppResponseBase;
-import com.practise.test.dto.authorization.LoginReponseDTO;
-import com.practise.test.dto.authorization.LoginRequestDTO;
-import com.practise.test.dto.authorization.RegisterRequestDTO;
-import com.practise.test.dto.authorization.RegisterResponseDTO;
+import com.practise.test.dto.authorization.*;
 import com.practise.test.dto.user.UserInfoDTO;
 import com.practise.test.entity.GroupRole;
 import com.practise.test.entity.User;
@@ -20,8 +17,10 @@ import com.practise.test.repository.UserRepository;
 import com.practise.test.utils.PasswordHandle;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -342,6 +341,103 @@ public class AuthenticateService {
                     200,
                     true,
                     "Lấy thông tin người dùng thành công",
+                    userInfoDTO,
+                    null
+            );
+        } catch (RuntimeException e) {
+            return new AppResponseBase(
+                    500,
+                    false,
+                    "Lỗi từ phía server" + e.toString(),
+                    null,
+                    new AppErrorBase("Lỗi từ phía server", "Lỗi từ phía server")
+            );
+        }
+    }
+    public AppResponseBase updateMyProfile(String userId, UpdateMyProfileRequestDTO dataUpdate) {
+        try {
+            if(userId.isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "Id người dùng là bắt buộc",
+                        null,
+                        new AppErrorBase("Yêu cầu không hợp lệ", "Id người dùng là bắt buộc")
+                );
+            }
+            if(dataUpdate.getFullName() == null || dataUpdate.getFullName().isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "Họ tên là bắt buộc",
+                        null,
+                        new AppErrorBase("Yêu cầu không hợp lệ", "Họ tên là bắt buộc")
+                );
+            }
+            if (dataUpdate.getBirthday() == null || dataUpdate.getBirthday().isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "Cần cung cấp ngày sinh",
+                        null,
+                        new AppErrorBase("Yêu cầu không hợp lệ", "Cần cung cấp ngày sinh")
+                );
+            }
+            Optional<User> user = userRepository.findById(userId);
+            if (user.isEmpty()) {
+                return new AppResponseBase(
+                        404,
+                        false,
+                        "Không tìm thấy người dùng",
+                        null,
+                        new AppErrorBase("Không tìm thấy", "Không tìm thấy người dùng")
+                );
+            }
+            if (user.get().isDeleted()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "Người dùng đã bị xóa",
+                        null,
+                        new AppErrorBase("Người dùng đã bị xóa", "Người dùng đã bị xóa")
+                );
+            }
+            user.get().setFullName(dataUpdate.getFullName());
+            user.get().setBirthday(dataUpdate.getBirthday());
+            user.get().setGender(dataUpdate.getGender());
+            user.get().setPhoneNumber(dataUpdate.getPhoneNumber());
+            user.get().setAvatar(dataUpdate.getAvatar());
+            user.get().setUpdated(true);
+            user.get().setEmail(dataUpdate.getEmail());
+            User updatedUser = userRepository.save(user.get());
+            if (updatedUser.getId() == null || updatedUser.getId().isEmpty()) {
+                return new AppResponseBase(
+                        500,
+                        false,
+                        "Cập nhật thông tin người dùng không thành công",
+                        null,
+                        new AppErrorBase("Cập nhật thông tin người dùng không thành công", "Cập nhật thông tin người dùng không thành công")
+                );
+            }
+            UserInfoDTO userInfoDTO = new UserInfoDTO(
+                    updatedUser.getId(),
+                    updatedUser.getUsername(),
+                    updatedUser.getFullName(),
+                    updatedUser.getGroupRoleId(),
+                    updatedUser.getPhoneNumber(),
+                    updatedUser.getEmail(),
+                    updatedUser.getBirthday(),
+                    updatedUser.getGender(),
+                    updatedUser.getAvatar(),
+                    updatedUser.getBanner(),
+                    updatedUser.isBlocked(),
+                    updatedUser.isUpdated(),
+                    new GroupRoleInfo(updatedUser.getGroupRole().getName(), updatedUser.getGroupRole().getDisplayName())
+            );
+            return new AppResponseBase(
+                    200,
+                    true,
+                    "Cập nhật thông tin người dùng thành công",
                     userInfoDTO,
                     null
             );
