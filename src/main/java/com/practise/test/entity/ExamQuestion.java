@@ -17,33 +17,33 @@ public class ExamQuestion {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "examId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "examId", length = 255, nullable = false)
     private String examId;
 
-    @Column(name = "questionId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "questionId", length = 255, nullable = false)
     private String questionId;
 
-    @Column(name = "levelId", length = 255, nullable = true, insertable = false, updatable = false)
+    @Column(name = "levelId", length = 255, nullable = true)
     private String levelId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "examId", referencedColumnName = "id", insertable = false, updatable = false)
     private Exam exam;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "questionId", referencedColumnName = "id", insertable = false, updatable = false)
     private Question question;
 
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "examQuestion", fetch = FetchType.LAZY)
     private List<ExamResultWriting> examResultWritings;
 
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "examQuestion", fetch = FetchType.LAZY)
     private List<ExamResultListening> examResultListenings;
 
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "examQuestion", fetch = FetchType.LAZY)
     private List<ExamResultSpeaking> examResultSpeakings;
 
-    @OneToMany(mappedBy = "examQuestion", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "examQuestion", fetch = FetchType.LAZY)
     private List<ExamResultReading> examResultReadings;
 
     // Getters and Setters
@@ -126,5 +126,17 @@ public class ExamQuestion {
 
     public void setExamResultReadings(List<ExamResultReading> examResultReadings) {
         this.examResultReadings = examResultReadings;
+    }
+
+    // Constructors
+
+    public ExamQuestion(String id, String examId, String questionId, String levelId) {
+        this.id = id;
+        this.examId = examId;
+        this.questionId = questionId;
+        this.levelId = levelId;
+    }
+
+    public ExamQuestion() {
     }
 }

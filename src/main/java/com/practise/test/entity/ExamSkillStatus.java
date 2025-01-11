@@ -16,10 +16,10 @@ public class ExamSkillStatus {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "examId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "examId", length = 255, nullable = false)
     private String examId;
 
-    @Column(name = "skillId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "skillId", length = 255, nullable = false)
     private String skillId;
 
     @Column(name = "startTime", length = 255, nullable = true)
@@ -136,5 +136,20 @@ public class ExamSkillStatus {
 
     public void setSkill(Skill skill) {
         this.skill = skill;
+    }
+
+    public ExamSkillStatus() {
+    }
+
+    public ExamSkillStatus(String id, String examId, String skillId, String startTime, String endTime, String status, int order, float score, int totalQuestion) {
+        this.id = id;
+        this.examId = examId;
+        this.skillId = skillId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.order = order;
+        this.score = score;
+        this.totalQuestion = totalQuestion;
     }
 }

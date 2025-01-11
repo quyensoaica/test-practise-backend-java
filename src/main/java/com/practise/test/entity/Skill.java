@@ -35,16 +35,16 @@ public class Skill {
     @Column(name = "expiredTime", nullable = false, columnDefinition = "integer default 0")
     private int expiredTime;
 
-    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.EAGER)
     private List<Level> levels;
 
-    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.EAGER)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.EAGER)
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.EAGER)
     private List<ExamSkillStatus> examSkillStatuses;
 
 

@@ -66,19 +66,19 @@ public class Question {
     @Column(name = "updatedBy", length = 255, nullable = true)
     private String updatedBy;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "levelId", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "FK_Question_Level"))
     private Level level;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "categoryId", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "FK_Question_Category"))
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "skillId", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "FK_Question_Skill"))
     private Skill skill;
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "question", fetch = FetchType.LAZY)
     private List<SubQuestion> subQuestions;
 
     // Getters and Setters

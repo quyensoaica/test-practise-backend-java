@@ -16,7 +16,7 @@ public class ExamResultSpeaking {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "examQuestionId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "examQuestionId", length = 255, nullable = false)
     private String examQuestionId;
 
     @Column(name = "data", columnDefinition = "TEXT default ''", nullable = true)

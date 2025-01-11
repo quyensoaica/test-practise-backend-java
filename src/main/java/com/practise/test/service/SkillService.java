@@ -4,12 +4,14 @@ import com.practise.test.dto.AppData.AppErrorBase;
 import com.practise.test.dto.AppData.AppResponseBase;
 import com.practise.test.dto.skill.UpdateSkillRequestDTO;
 import com.practise.test.entity.Skill;
+import com.practise.test.model.skill.SkillData;
 import com.practise.test.repository.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class SkillService {
@@ -20,11 +22,22 @@ public class SkillService {
     public AppResponseBase getAllSkills() {
         try {
             List<Skill> skills = skillRepository.findAll(Sort.by(Sort.Direction.ASC, "order"));
+            List<SkillData> skillDatas = skills.stream().map(
+                    skill -> new SkillData(
+                            skill.getId(),
+                            skill.getName(),
+                            skill.getDisplayName(),
+                            skill.getDescription(),
+                            skill.getImage(),
+                            skill.getOrder(),
+                            skill.getExpiredTime()
+                    )
+            ).toList();
             return new AppResponseBase(
                     200,
                     true,
                     "Lấy danh sách kỹ năng thành công",
-                    skills,
+                    skillDatas,
                     null
             );
         } catch (RuntimeException e) {
@@ -59,11 +72,20 @@ public class SkillService {
                         new AppErrorBase("Không tìm thấy kỹ năng", "Không tìm thấy kỹ năng")
                 );
             }
+            SkillData skillData = new SkillData(
+                    skill.getId(),
+                    skill.getName(),
+                    skill.getDisplayName(),
+                    skill.getDescription(),
+                    skill.getImage(),
+                    skill.getOrder(),
+                    skill.getExpiredTime()
+            );
             return new AppResponseBase(
                     200,
                     true,
                     "Lấy kỹ năng thành công",
-                    skill,
+                    skillData,
                     null
             );
         } catch (RuntimeException e) {
@@ -110,11 +132,22 @@ public class SkillService {
             skill.setImage(updateSkillData.getImage());
             skill.setDescription(updateSkillData.getDescription());
             skillRepository.save(skill);
+
+            SkillData skillData = new SkillData(
+                    skill.getId(),
+                    skill.getName(),
+                    skill.getDisplayName(),
+                    skill.getDescription(),
+                    skill.getImage(),
+                    skill.getOrder(),
+                    skill.getExpiredTime()
+            );
+
             return new AppResponseBase(
                     200,
                     true,
                     "Cập nhật kỹ năng thành công",
-                    skill,
+                    skillData,
                     null
             );
         } catch (RuntimeException e) {
