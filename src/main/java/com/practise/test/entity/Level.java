@@ -39,10 +39,10 @@ public class Level {
     @JoinColumn(name = "skillId", referencedColumnName = "id", insertable = false, updatable = false)
     private Skill skill;
 
-    @OneToMany(mappedBy = "level", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "level",fetch = FetchType.EAGER)
     private List<Category> categories;
 
-    @OneToMany(mappedBy = "level", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "level",fetch = FetchType.EAGER)
     private List<Question> questions;
 
     public Level() {

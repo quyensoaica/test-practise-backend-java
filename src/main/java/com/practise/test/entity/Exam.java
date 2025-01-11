@@ -22,7 +22,7 @@ public class Exam {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "userId", length = 1000, nullable = false, insertable = false, updatable = false)
+    @Column(name = "userId", length = 1000, nullable = false)
     private String userId;
 
     @Column(name = "examCode", length = 100, nullable = false)
@@ -57,10 +57,10 @@ public class Exam {
     @Column(name = "updatedBy", length = 255, nullable = true)
     private String updatedBy;
 
-    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "exam", fetch = FetchType.EAGER)
     private List<ExamQuestion> examQuestions;
 
-    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "exam", fetch = FetchType.EAGER)
     private List<ExamSkillStatus> examSkillStatuses;
 
     // Getters and Setters
@@ -175,5 +175,24 @@ public class Exam {
 
     public void setExamSkillStatuses(List<ExamSkillStatus> examSkillStatuses) {
         this.examSkillStatuses = examSkillStatuses;
+    }
+
+    // Constructors
+    public Exam(String id, String userId, String examCode, String startTime, String endTime, boolean isDeleted, boolean isActive, boolean isDone, LocalDateTime createdAt, LocalDateTime updatedAt, String createdBy, String updatedBy) {
+        this.id = id;
+        this.userId = userId;
+        this.examCode = examCode;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.isDeleted = isDeleted;
+        this.isActive = isActive;
+        this.isDone = isDone;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.createdBy = createdBy;
+        this.updatedBy = updatedBy;
+    }
+
+    public Exam() {
     }
 }

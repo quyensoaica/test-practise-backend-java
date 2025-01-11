@@ -6,20 +6,20 @@ public class SubQuestionData {
     private String content;
     private Integer order;
     private String correctAnswer;
-    private String selectedAnswer;
+    private String selectedAnswerId;
     private SubQuestionAnswer[] answers;
 
 
     public SubQuestionData() {
     }
 
-    public SubQuestionData(String id, String questionId, String content, Integer order, String correctAnswer, String selectedAnswer, SubQuestionAnswer[] answers) {
+    public SubQuestionData(String id, String questionId, String content, Integer order, String correctAnswer, String selectedAnswerId, SubQuestionAnswer[] answers) {
         this.id = id;
         this.questionId = questionId;
         this.content = content;
         this.order = order;
         this.correctAnswer = correctAnswer;
-        this.selectedAnswer = selectedAnswer;
+        this.selectedAnswerId = selectedAnswerId;
         this.answers = answers;
     }
 
@@ -63,12 +63,12 @@ public class SubQuestionData {
         this.correctAnswer = correctAnswer;
     }
 
-    public String getSelectedAnswer() {
-        return selectedAnswer;
+    public String getSelectedAnswerId() {
+        return selectedAnswerId;
     }
 
-    public void setSelectedAnswer(String selectedAnswer) {
-        this.selectedAnswer = selectedAnswer;
+    public void setSelectedAnswerId(String selectedAnswerId) {
+        this.selectedAnswerId = selectedAnswerId;
     }
 
     public SubQuestionAnswer[] getAnswers() {

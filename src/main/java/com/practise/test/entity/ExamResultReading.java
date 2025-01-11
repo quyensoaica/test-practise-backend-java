@@ -16,13 +16,13 @@ public class ExamResultReading {
     @Column(name = "id", length = 255, nullable = false)
     private String id;
 
-    @Column(name = "examQuestionId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "examQuestionId", length = 255, nullable = false)
     private String examQuestionId;
 
-    @Column(name = "subQuestionId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "subQuestionId", length = 255, nullable = false)
     private String subQuestionId;
 
-    @Column(name = "answerId", length = 255, nullable = false, insertable = false, updatable = false)
+    @Column(name = "answerId", length = 255, nullable = false)
     private String answerId;
 
     @ManyToOne(fetch = FetchType.LAZY)
