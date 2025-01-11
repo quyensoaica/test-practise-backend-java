@@ -197,7 +197,10 @@ public class QuestionService {
                             ),
                             new LevelShortInfo(
                                     question.getLevel().getId(),
-                                    question.getLevel().getDisplayName()
+                                    question.getLevel().getDisplayName(),
+                                    question.getLevel().getName(),
+                                    question.getLevel().getDescription(),
+                                    question.getLevel().getSubQuestionNumber()
                             ),
                             new SkillShortInfo(
                                     question.getSkill().getId(),
@@ -402,7 +405,10 @@ public class QuestionService {
                     ),
                     new LevelShortInfo(
                             question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                            question.getLevel().getDisplayName(),
+                            question.getLevel().getName(),
+                            question.getLevel().getDescription(),
+                            question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -466,8 +472,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -539,8 +548,11 @@ public class QuestionService {
                                     question.getCategory().getName()
                             ),
                             new LevelShortInfo(
-                                    question.getLevel().getId(),
-                                    question.getLevel().getDisplayName()
+                                question.getLevel().getId(),
+                                question.getLevel().getDisplayName(),
+                                question.getLevel().getName(),
+                                question.getLevel().getDescription(),
+                                question.getLevel().getSubQuestionNumber()
                             ),
                             new SkillShortInfo(
                                     question.getSkill().getId(),
@@ -594,8 +606,11 @@ public class QuestionService {
                                     question.getCategory().getName()
                             ),
                             new LevelShortInfo(
-                                    question.getLevel().getId(),
-                                    question.getLevel().getDisplayName()
+                                question.getLevel().getId(),
+                                question.getLevel().getDisplayName(),
+                                question.getLevel().getName(),
+                                question.getLevel().getDescription(),
+                                question.getLevel().getSubQuestionNumber()
                             ),
                             new SkillShortInfo(
                                     question.getSkill().getId(),
@@ -649,8 +664,11 @@ public class QuestionService {
                                     question.getCategory().getName()
                             ),
                             new LevelShortInfo(
-                                    question.getLevel().getId(),
-                                    question.getLevel().getDisplayName()
+                                question.getLevel().getId(),
+                                question.getLevel().getDisplayName(),
+                                question.getLevel().getName(),
+                                question.getLevel().getDescription(),
+                                question.getLevel().getSubQuestionNumber()
                             ),
                             new SkillShortInfo(
                                     question.getSkill().getId(),
@@ -715,8 +733,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -781,8 +802,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -847,8 +871,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -913,8 +940,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),
@@ -978,8 +1008,11 @@ public class QuestionService {
                             question.getCategory().getName()
                     ),
                     new LevelShortInfo(
-                            question.getLevel().getId(),
-                            question.getLevel().getDisplayName()
+                        question.getLevel().getId(),
+                        question.getLevel().getDisplayName(),
+                        question.getLevel().getName(),
+                        question.getLevel().getDescription(),
+                        question.getLevel().getSubQuestionNumber()
                     ),
                     new SkillShortInfo(
                             question.getSkill().getId(),

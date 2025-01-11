@@ -7,20 +7,18 @@ public class ExamScoreDTO {
     private String examCode;
     private String startTime;
     private String endTime;
-    private ScoreOfSkill[] examSkillStatus;
+    private ScoreOfSkill[] examSkillStatuses;
 
     public ExamScoreDTO() {
     }
 
-    public ExamScoreDTO(String id, String examCode, String startTime, String endTime, ScoreOfSkill[] examSkillStatus) {
+    public ExamScoreDTO(String id, String examCode, String startTime, String endTime, ScoreOfSkill[] examSkillStatuses) {
         this.id = id;
         this.examCode = examCode;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.examSkillStatus = examSkillStatus;
+        this.examSkillStatuses = examSkillStatuses;
     }
-
-    // Getters and Setters
 
     public String getId() {
         return id;
@@ -54,11 +52,12 @@ public class ExamScoreDTO {
         this.endTime = endTime;
     }
 
-    public ScoreOfSkill[] getExamSkillStatus() {
-        return examSkillStatus;
+    public ScoreOfSkill[] getExamSkillStatuses() {
+        return examSkillStatuses;
     }
 
-    public void setExamSkillStatus(ScoreOfSkill[] examSkillStatus) {
-        this.examSkillStatus = examSkillStatus;
+    public void setExamSkillStatuses(
+        ScoreOfSkill[] examSkillStatuses) {
+        this.examSkillStatuses = examSkillStatuses;
     }
 }

@@ -5,18 +5,24 @@ import com.practise.test.dto.AppData.AppResponseBase;
 import com.practise.test.dto.exam.ContinueExamDTO;
 import com.practise.test.dto.exam.CurrentExamDTO;
 import com.practise.test.dto.exam.ExamScoreDTO;
+import com.practise.test.dto.exam.QuestionResultResponseDTO;
 import com.practise.test.dto.exam.SubmitSkillRequestDTO;
 import com.practise.test.dto.question.GroupedQuestionDTO;
 import com.practise.test.dto.question.QuestionDetailResponseDTO;
 import com.practise.test.entity.*;
+import com.practise.test.model.category.CategoryShortInfo;
 import com.practise.test.model.exam.CurrentExam;
 import com.practise.test.model.exam.QuestionByLevel;
 import com.practise.test.model.examQuestion.ExamQuestionData;
 import com.practise.test.model.examSkillStatus.CurrentSkillStatus;
 import com.practise.test.model.examSkillStatus.ScoreOfSkill;
+import com.practise.test.model.level.LevelShortInfo;
 import com.practise.test.model.level.Levelinfo;
 import com.practise.test.model.question.AnswerNotChoose;
 import com.practise.test.model.question.QuestionOfExam;
+import com.practise.test.model.question.QuestionResult;
+import com.practise.test.model.question.ResultOfQuestion;
+import com.practise.test.model.question.SubQuestionAnswer;
 import com.practise.test.model.question.SubQuestionData;
 import com.practise.test.model.question.SubQuestionNotChoose;
 import com.practise.test.model.skill.SkillExprired;
@@ -724,6 +730,410 @@ public class ExamService {
                     ),
                     null
             );
+        } catch (RuntimeException e) {
+            return new AppResponseBase(
+                    500,
+                    false,
+                    "Lỗi từ phía server" + e.toString(),
+                    null,
+                    null
+            );
+        }
+    }
+
+    public AppResponseBase getResultOfExam(String examId, String skillId) {
+        try {
+            if (examId.isEmpty() || skillId.isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "ExamId and SkillId are required",
+                        null,
+                        new AppErrorBase("ExamId and SkillId are required", "ExamId and SkillId are required")
+                );
+            }
+
+            Exam currentExam = examRepository.findById(examId).orElse(null);
+
+            List<ExamSkillStatus> examSkillStatuses = examSkillStatusRepository.findSkillStatusesByExamId(currentExam.getId());
+
+            if (examSkillStatuses == null || examSkillStatuses.isEmpty()) {
+                return new AppResponseBase(
+                        404,
+                        false,
+                        "No exam skill status found, please try again later",
+                        null,
+                        new AppErrorBase("No exam skill status found, please try again later", "No exam skill status found")
+                );
+            }
+
+            List<CurrentSkillStatus> listCurrentSkillStatus = examSkillStatuses.stream()
+                    .map(examSkillStatus -> new CurrentSkillStatus(
+                            examSkillStatus.getId(),
+                            examSkillStatus.getExamId(),
+                            examSkillStatus.getSkillId(),
+                            examSkillStatus.getStartTime(),
+                            examSkillStatus.getEndTime(),
+                            examSkillStatus.getStatus(),
+                            examSkillStatus.getOrder(),
+                            new SkillExprired(
+                                    examSkillStatus.getSkill().getName(),
+                                    examSkillStatus.getSkill().getExpiredTime()
+                            )
+                    ))
+                    .toList();
+
+            if (listCurrentSkillStatus.isEmpty()) {
+                return new AppResponseBase(
+                        404,
+                        false,
+                        "No exam skill status found, please try again later",
+                        null,
+                        new AppErrorBase("No exam skill status found, please try again later", "No exam skill status found")
+                );
+            }
+            CurrentSkillStatus currentSkillData = listCurrentSkillStatus.stream()
+                    .filter(examSkillStatus -> examSkillStatus.getSkillId().equals(skillId))
+                    .findFirst()
+                    .orElse(null);
+            if(currentSkillData == null) {
+                return new AppResponseBase(
+                        404,
+                        false,
+                        "No exam skill status found, please try again later",
+                        null,
+                        new AppErrorBase("No exam skill status found, please try again later", "No exam skill status found")
+                );
+            }
+            QuestionResult[] questionResult = null;
+            if(skillId.equals("listening")) {
+                List<ExamQuestion> examQuestion = examQuestionRepository.getListQuestion(examId, skillId);
+                questionResult = examQuestion.stream()
+                        .map(eq -> {
+                            SubQuestionData[] listSubQuestions = eq.getQuestion().getSubQuestions().stream()
+                                    .map(subQuestion -> {
+                                        SubQuestionAnswer[] listAnswers = subQuestion.getAnswers().stream()
+                                                .map(answer -> new SubQuestionAnswer(
+                                                        answer.getId(),
+                                                        answer.getSubQuestionId(),
+                                                        answer.getAnswerContent(),
+                                                        answer.getOrder(),
+                                                        answer.isCorrect()
+                                                ))
+                                                .toArray(SubQuestionAnswer[]::new);
+                                        return new SubQuestionData(
+                                                subQuestion.getId(),
+                                                eq.getQuestionId(),
+                                                subQuestion.getContent(),
+                                                subQuestion.getOrder(),
+                                                subQuestion.getCorrectAnswer(),
+                                                null,
+                                                listAnswers
+                                        );
+                                    })
+                                    .toArray(SubQuestionData[]::new);
+
+                            ResultOfQuestion[] results = eq.getExamResultListenings().stream()
+                                .map(erl -> new ResultOfQuestion(
+                                    erl.getId(),
+                                    erl.getSubQuestionId(),
+                                    erl.getAnswerId(),
+                                    null,
+                                    null,
+                                    false
+                                ))
+                                .toArray(ResultOfQuestion[]::new);
+                            return new QuestionResult(
+                                    eq.getId(),
+                                    eq.getQuestionId(),
+                                    eq.getExamId(),
+                                    new QuestionDetailResponseDTO(
+                                            eq.getQuestion().getId(),
+                                            eq.getQuestion().getCategoryId(),
+                                            eq.getQuestion().getLevelId(),
+                                            eq.getQuestion().getSkillId(),
+                                            eq.getQuestion().getQuestionContent(),
+                                            eq.getQuestion().getDescription(),
+                                            eq.getQuestion().getQuestionNote(),
+                                            eq.getQuestion().getAttachedFile(),
+                                            eq.getQuestion().isDeleted(),
+                                            eq.getQuestion().isActive(),
+                                            new CategoryShortInfo(
+                                                    eq.getQuestion().getCategory().getId(),
+                                                    eq.getQuestion().getCategory().getName()
+                                            ),
+                                            new LevelShortInfo(
+                                                    eq.getQuestion().getLevel().getId(),
+                                                    eq.getQuestion().getLevel().getDisplayName(),
+                                                    eq.getQuestion().getLevel().getName(),
+                                                    eq.getQuestion().getLevel().getDescription(),
+                                                    eq.getQuestion().getLevel().getSubQuestionNumber()
+                                            ),
+                                            new SkillShortInfo(
+                                                    eq.getQuestion().getSkillId(),
+                                                    eq.getQuestion().getSkill().getDisplayName(),
+                                                    eq.getQuestion().getSkill().getName()
+                                            ),
+                                        listSubQuestions,
+                                        null
+                                    ),
+                                results
+                            );
+                        }).toArray(QuestionResult[]::new);
+            }
+            if(skillId.equals("reading")) {
+                List<ExamQuestion> examQuestion = examQuestionRepository.getListQuestion(examId, skillId);
+                questionResult = examQuestion.stream()
+                    .map(eq -> {
+                        SubQuestionData[] listSubQuestions = eq.getQuestion().getSubQuestions().stream()
+                            .map(subQuestion -> {
+                                SubQuestionAnswer[] listAnswers = subQuestion.getAnswers().stream()
+                                    .map(answer -> new SubQuestionAnswer(
+                                        answer.getId(),
+                                        answer.getSubQuestionId(),
+                                        answer.getAnswerContent(),
+                                        answer.getOrder(),
+                                        answer.isCorrect()
+                                    ))
+                                    .toArray(SubQuestionAnswer[]::new);
+                                return new SubQuestionData(
+                                    subQuestion.getId(),
+                                    eq.getQuestionId(),
+                                    subQuestion.getContent(),
+                                    subQuestion.getOrder(),
+                                    subQuestion.getCorrectAnswer(),
+                                    null,
+                                    listAnswers
+                                );
+                            })
+                            .toArray(SubQuestionData[]::new);
+
+                        ResultOfQuestion[] results = eq.getExamResultReadings().stream()
+                            .map(erl -> new ResultOfQuestion(
+                                erl.getId(),
+                                erl.getSubQuestionId(),
+                                erl.getAnswerId(),
+                                null,
+                                null,
+                                false
+                            ))
+                            .toArray(ResultOfQuestion[]::new);
+                        return new QuestionResult(
+                            eq.getId(),
+                            eq.getQuestionId(),
+                            eq.getExamId(),
+                            new QuestionDetailResponseDTO(
+                                eq.getQuestion().getId(),
+                                eq.getQuestion().getCategoryId(),
+                                eq.getQuestion().getLevelId(),
+                                eq.getQuestion().getSkillId(),
+                                eq.getQuestion().getQuestionContent(),
+                                eq.getQuestion().getDescription(),
+                                eq.getQuestion().getQuestionNote(),
+                                eq.getQuestion().getAttachedFile(),
+                                eq.getQuestion().isDeleted(),
+                                eq.getQuestion().isActive(),
+                                new CategoryShortInfo(
+                                    eq.getQuestion().getCategory().getId(),
+                                    eq.getQuestion().getCategory().getName()
+                                ),
+                                new LevelShortInfo(
+                                    eq.getQuestion().getLevel().getId(),
+                                    eq.getQuestion().getLevel().getDisplayName(),
+                                    eq.getQuestion().getLevel().getName(),
+                                    eq.getQuestion().getLevel().getDescription(),
+                                    eq.getQuestion().getLevel().getSubQuestionNumber()
+                                ),
+                                new SkillShortInfo(
+                                    eq.getQuestion().getSkillId(),
+                                    eq.getQuestion().getSkill().getDisplayName(),
+                                    eq.getQuestion().getSkill().getName()
+                                ),
+                                listSubQuestions,
+                                null
+                            ),
+                            results
+                        );
+                    }).toArray(QuestionResult[]::new);
+            }
+
+            if(skillId.equals("writing")) {
+                List<ExamQuestion> examQuestion = examQuestionRepository.getListQuestion(examId, skillId);
+                questionResult = examQuestion.stream()
+                    .map(eq -> {
+
+                        ResultOfQuestion[] results = eq.getExamResultWritings().stream()
+                            .map(erl -> new ResultOfQuestion(
+                                erl.getId(),
+                                erl.getExamQuestionId(),
+                                erl.getData(),
+                                null,
+                                null,
+                                false
+                            ))
+                            .toArray(ResultOfQuestion[]::new);
+                        return new QuestionResult(
+                            eq.getId(),
+                            eq.getQuestionId(),
+                            eq.getExamId(),
+                            new QuestionDetailResponseDTO(
+                                eq.getQuestion().getId(),
+                                eq.getQuestion().getCategoryId(),
+                                eq.getQuestion().getLevelId(),
+                                eq.getQuestion().getSkillId(),
+                                eq.getQuestion().getQuestionContent(),
+                                eq.getQuestion().getDescription(),
+                                eq.getQuestion().getQuestionNote(),
+                                eq.getQuestion().getAttachedFile(),
+                                eq.getQuestion().isDeleted(),
+                                eq.getQuestion().isActive(),
+                                new CategoryShortInfo(
+                                    eq.getQuestion().getCategory().getId(),
+                                    eq.getQuestion().getCategory().getName()
+                                ),
+                                new LevelShortInfo(
+                                    eq.getQuestion().getLevel().getId(),
+                                    eq.getQuestion().getLevel().getDisplayName(),
+                                    eq.getQuestion().getLevel().getName(),
+                                    eq.getQuestion().getLevel().getDescription(),
+                                    eq.getQuestion().getLevel().getSubQuestionNumber()
+                                ),
+                                new SkillShortInfo(
+                                    eq.getQuestion().getSkillId(),
+                                    eq.getQuestion().getSkill().getDisplayName(),
+                                    eq.getQuestion().getSkill().getName()
+                                ),
+                                null,
+                                null
+                            ),
+                            results
+                        );
+                    }).toArray(QuestionResult[]::new);
+            }
+            if(skillId.equals("speaking")) {
+                List<ExamQuestion> examQuestion = examQuestionRepository.getListQuestion(examId, skillId);
+                questionResult = examQuestion.stream()
+                    .map(eq -> {
+
+                        ResultOfQuestion[] results = eq.getExamResultSpeakings().stream()
+                            .map(erl -> new ResultOfQuestion(
+                                erl.getId(),
+                                erl.getExamQuestionId(),
+                                erl.getData(),
+                                null,
+                                null,
+                                false
+                            ))
+                            .toArray(ResultOfQuestion[]::new);
+                        return new QuestionResult(
+                            eq.getId(),
+                            eq.getQuestionId(),
+                            eq.getExamId(),
+                            new QuestionDetailResponseDTO(
+                                eq.getQuestion().getId(),
+                                eq.getQuestion().getCategoryId(),
+                                eq.getQuestion().getLevelId(),
+                                eq.getQuestion().getSkillId(),
+                                eq.getQuestion().getQuestionContent(),
+                                eq.getQuestion().getDescription(),
+                                eq.getQuestion().getQuestionNote(),
+                                eq.getQuestion().getAttachedFile(),
+                                eq.getQuestion().isDeleted(),
+                                eq.getQuestion().isActive(),
+                                new CategoryShortInfo(
+                                    eq.getQuestion().getCategory().getId(),
+                                    eq.getQuestion().getCategory().getName()
+                                ),
+                                new LevelShortInfo(
+                                    eq.getQuestion().getLevel().getId(),
+                                    eq.getQuestion().getLevel().getDisplayName(),
+                                    eq.getQuestion().getLevel().getName(),
+                                    eq.getQuestion().getLevel().getDescription(),
+                                    eq.getQuestion().getLevel().getSubQuestionNumber()
+                                ),
+                                new SkillShortInfo(
+                                    eq.getQuestion().getSkillId(),
+                                    eq.getQuestion().getSkill().getDisplayName(),
+                                    eq.getQuestion().getSkill().getName()
+                                ),
+                                null,
+                                null
+                            ),
+                            results
+                        );
+                    }).toArray(QuestionResult[]::new);
+            }
+
+            return new AppResponseBase(
+                    200,
+                    true,
+                    "Get result of exam successfully",
+                    new QuestionResultResponseDTO(
+                            new CurrentExam(
+                                    currentExam.getId(),
+                                    currentExam.getUserId(),
+                                    currentExam.getExamCode(),
+                                    currentExam.getStartTime(),
+                                    currentExam.getEndTime(),
+                                    currentExam.isDeleted(),
+                                    currentExam.isActive(),
+                                    currentExam.isDone(),
+                                    currentExam.getCreatedAt().toString(),
+                                    currentExam.getUpdatedAt().toString()
+                            ),
+                            questionResult,
+                            currentSkillData
+                    ),
+                    null
+            );
+        } catch (RuntimeException e) {
+            return new AppResponseBase(
+                    500,
+                    false,
+                    "Lỗi từ phía server" + e.toString(),
+                    null,
+                    null
+            );
+        }
+    }
+
+    public AppResponseBase getMyExams(String userId) {
+        try {
+            if(userId == null || userId.isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "UserId is required",
+                        null,
+                        new AppErrorBase("UserId is required", "UserId is required")
+                );
+            }
+            List<Exam> exams = examRepository.findExamsByUserId(userId);
+            List<ExamScoreDTO> examScoreDTOs = exams.stream()
+                    .map(exam -> new ExamScoreDTO(
+                            exam.getId(),
+                            exam.getExamCode(),
+                            exam.getStartTime(),
+                            exam.getEndTime(),
+                            exam.getExamSkillStatuses().stream()
+                                    .map(status -> new ScoreOfSkill(
+                                            status.getSkillId(),
+                                            (int) status.getScore(),
+                                            status.getTotalQuestion(),
+                                            status.getStatus(),
+                                            status.getOrder()
+                                    ))
+                                    .toArray(ScoreOfSkill[]::new)
+                    ))
+                    .toList();
+            return new AppResponseBase(
+                200,
+                true,
+                "Get score of exam successfully",
+                examScoreDTOs,
+                null
+            );
+
         } catch (RuntimeException e) {
             return new AppResponseBase(
                     500,

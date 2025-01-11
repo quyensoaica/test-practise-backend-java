@@ -38,7 +38,8 @@ public class QuestionDetailResponseDTO extends QuestionResponseDTO {
         this.subQuestions = subQuestions;
     }
 
-    public QuestionDetailResponseDTO(String id,
+    public QuestionDetailResponseDTO(
+         String id,
          String categoryId,
          String levelId,
          String skillId,
