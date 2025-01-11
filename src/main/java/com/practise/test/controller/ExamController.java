@@ -48,4 +48,16 @@ public class ExamController {
         AppResponseBase response = examService.getScoreOfExam(examId);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
+
+    @GetMapping("/get-result/{examId}")
+    public ResponseEntity<AppResponseBase> getExamResult(@PathVariable String examId, @RequestParam String skillId) {
+        AppResponseBase response = examService.getResultOfExam(examId, skillId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @GetMapping("/my-exams")
+    public ResponseEntity<AppResponseBase> getMyExams(@RequestAttribute("userId") String userId) {
+        AppResponseBase response = examService.getMyExams(userId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
 }
