@@ -1,6 +1,7 @@
 package com.practise.test.controller;
 
 import com.practise.test.dto.AppData.AppResponseBase;
+import com.practise.test.dto.exam.ISpeakingQuestionSubmitDTO;
 import com.practise.test.dto.exam.SubmitSkillRequestDTO;
 import com.practise.test.service.ExamService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +44,21 @@ public class ExamController {
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 
+    @GetMapping("/current-speaking-question")
+    public ResponseEntity<AppResponseBase> getCurrentSpeakingQuestion(@RequestAttribute("userId") String userId) {
+        AppResponseBase response = examService.getCurrentSpeakingQuestion(userId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
     @GetMapping("/get-score/{examId}")
     public ResponseEntity<AppResponseBase> getScore(@PathVariable String examId) {
         AppResponseBase response = examService.getScoreOfExam(examId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @PostMapping("/submit-speaking-skill")
+    public ResponseEntity<AppResponseBase> submitSpeakingSkill(@RequestAttribute("userId") String userId, @RequestBody ISpeakingQuestionSubmitDTO dataSubmit) {
+        AppResponseBase response = examService.submitSpeakingSkill(userId, dataSubmit);
         return ResponseEntity.status(response.getStatus()).body(response);
     }
 

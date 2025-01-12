@@ -5,6 +5,7 @@ import com.practise.test.dto.AppData.AppResponseBase;
 import com.practise.test.dto.exam.ContinueExamDTO;
 import com.practise.test.dto.exam.CurrentExamDTO;
 import com.practise.test.dto.exam.ExamScoreDTO;
+import com.practise.test.dto.exam.ISpeakingQuestionSubmitDTO;
 import com.practise.test.dto.exam.QuestionResultResponseDTO;
 import com.practise.test.dto.exam.SubmitSkillRequestDTO;
 import com.practise.test.dto.question.GroupedQuestionDTO;
@@ -675,6 +676,164 @@ public class ExamService {
             );
         }
     }
+
+    public AppResponseBase submitSpeakingSkill(String userId, ISpeakingQuestionSubmitDTO submitData) {
+        try {
+            AppResponseBase currentExamResponse = getCurrentExam(userId);
+            if (!currentExamResponse.isSuccess()) {
+                return currentExamResponse;
+            }
+            CurrentExamDTO currentExam = (CurrentExamDTO) currentExamResponse.getData();
+
+            String skillId = submitData.getSkillId();
+            if (skillId == null || skillId.isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "No skill found, please try again later",
+                        null,
+                        new AppErrorBase("No skill found, please try again later", "No skill found")
+                );
+            }
+
+            ExamQuestion examQuestion = examQuestionRepository.findByExamIdAndLevelId(currentExam.getExam().getId(), submitData.getLevelId());
+            if(examQuestion == null) {
+                return new AppResponseBase(
+                        404,
+                        false,
+                        "No question found, please try again later",
+                        null,
+                        new AppErrorBase("No question found, please try again later", "No question found")
+                );
+            }
+            List<ExamResultSpeaking> examResultSpeakings = examResultSpeakingRepository.findByExamQuestionId(examQuestion.getId());
+            if(!examResultSpeakings.isEmpty()) {
+                return new AppResponseBase(
+                        400,
+                        false,
+                        "This question has been submitted",
+                        null,
+                        new AppErrorBase("This question has been submitted", "This question has been submitted")
+                );
+            }
+            ExamResultSpeaking examResultSpeaking = new ExamResultSpeaking();
+            examResultSpeaking.setId(UUID.randomUUID().toString());
+            examResultSpeaking.setExamQuestionId(examQuestion.getId());
+            examResultSpeaking.setData(submitData.getAnswer());
+            examResultSpeaking.setFeedback("");
+            examResultSpeaking.setIsRated(false);
+            examResultSpeaking.setPoint(0.0f);
+            examResultSpeakingRepository.save(examResultSpeaking);
+
+            List<ExamResultSpeaking> examResultSpeakingsAfterSave = examResultSpeakingRepository.findByExamId(currentExam.getExam().getId());
+            if(examResultSpeakingsAfterSave.size() == 3) {
+                ExamSkillStatus examSkillStatus = examSkillStatusRepository.findByExamIdAndSkillId(currentExam.getExam().getId(), skillId);
+                examSkillStatus.setStatus("FINISHED");
+                examSkillStatusRepository.save(examSkillStatus);
+            }
+            return new AppResponseBase(
+                    200,
+                    true,
+                    "Submit speaking skill successfully",
+                examResultSpeaking,
+                    null
+            );
+        } catch (RuntimeException e) {
+            return new AppResponseBase(
+                    500,
+                    false,
+                    "Lỗi từ phía server" + e.toString(),
+                    null,
+                    null
+            );
+        }
+    }
+
+    public AppResponseBase getCurrentSpeakingQuestion(String userId) {
+        try {
+            // Lấy thông tin bài thi hiện tại
+            AppResponseBase currentExamResponse = getCurrentExam(userId);
+            if (!currentExamResponse.isSuccess()) {
+                return currentExamResponse;
+            }
+
+            CurrentExamDTO currentExam = (CurrentExamDTO) currentExamResponse.getData();
+
+            // Kiểm tra trạng thái kỹ năng "speaking"
+            ExamSkillStatus examSkillStatus = examSkillStatusRepository.findByExamIdAndSkillId(
+                currentExam.getExam().getId(), "speaking");
+
+            if (examSkillStatus != null && "FINISHED".equals(examSkillStatus.getStatus())) {
+                return new AppResponseBase(
+                    400,
+                    false,
+                    "Speaking skill has been finished",
+                    null,
+                    new AppErrorBase("Speaking skill has been finished", "Speaking skill has been finished")
+                );
+            }
+
+            // Lấy danh sách câu hỏi của kỹ năng "speaking"
+            List<ExamQuestion> examSpeakingQuestions = examQuestionRepository.getListQuestion(
+                currentExam.getExam().getId(), "speaking");
+
+            // Lấy danh sách câu hỏi đã hoàn thành
+            List<ExamResultSpeaking> examResultSpeakings = examResultSpeakingRepository.findByExamId(
+                currentExam.getExam().getId());
+
+            // Tìm câu hỏi chưa được trả lời
+            ExamQuestion currentExamSpeakingQuestion = null;
+            for (ExamQuestion question : examSpeakingQuestions) {
+                boolean isSubmitted = examResultSpeakings.stream()
+                    .anyMatch(result -> result.getExamQuestion().getId().equals(question.getId()));
+
+                if (!isSubmitted) {
+                    currentExamSpeakingQuestion = question;
+                    break;
+                }
+            }
+
+            // Nếu tất cả câu hỏi đã được trả lời, cập nhật trạng thái là FINISHED
+            if (currentExamSpeakingQuestion == null) {
+                if (examSkillStatus == null) {
+                    examSkillStatus = new ExamSkillStatus();
+                    examSkillStatus.setExamId(currentExam.getExam().getId());
+                    examSkillStatus.setSkillId("speaking");
+                }
+
+                examSkillStatus.setStatus("FINISHED");
+                examSkillStatusRepository.save(examSkillStatus);
+
+                return new AppResponseBase(
+                    200,
+                    true,
+                    "OK",
+                    null,
+                    null
+                );
+            }
+
+            // Trả về câu hỏi chưa trả lời
+            return new AppResponseBase(
+                200,
+                true,
+                "Get speaking question successfully",
+                currentExamSpeakingQuestion.getQuestionId(),
+                null
+            );
+
+        } catch (RuntimeException e) {
+            return new AppResponseBase(
+                500,
+                false,
+                "Server error: " + e.getMessage(),
+                null,
+                new AppErrorBase("Internal Server Error", e.getMessage())
+            );
+        }
+    }
+
+
     public AppResponseBase getScoreOfExam(String examId) {
         try {
             if(examId == null || examId.isEmpty()) {
