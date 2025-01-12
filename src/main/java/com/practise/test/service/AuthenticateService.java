@@ -17,11 +17,14 @@ import com.practise.test.repository.UserRepository;
 import com.practise.test.utils.PasswordHandle;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -37,6 +40,7 @@ public class AuthenticateService {
 
     @Autowired
     private RoleService roleService;
+
 
     public AppResponseBase getUserByEmail(String email) {
         try {
@@ -451,4 +455,94 @@ public class AuthenticateService {
             );
         }
     }
+
+    public AppResponseBase changePassword(String userId, String oldPassword, String newPassword) {
+        if (userId == null || userId.isEmpty()) {
+            return new AppResponseBase(
+                    HttpStatus.BAD_REQUEST.value(),
+                    false,
+                    "Mã người dùng không được để trống",
+                    null,
+                    new AppErrorBase("Bad Request", "Mã người dùng không được để trống")
+            );
+        }
+
+        if (oldPassword == null || oldPassword.isEmpty()) {
+            return new AppResponseBase(
+                    HttpStatus.BAD_REQUEST.value(),
+                    false,
+                    "Mật khẩu cũ không được để trống",
+                    null,
+                    new AppErrorBase("Bad Request", "Mật khẩu cũ không được để trống")
+            );
+        }
+
+        if (newPassword == null || newPassword.isEmpty()) {
+            return new AppResponseBase(
+                    HttpStatus.BAD_REQUEST.value(),
+                    false,
+                    "Mật khẩu mới không được để trống",
+                    null,
+                    new AppErrorBase("Bad Request", "Mật khẩu mới không được để trống")
+            );
+        }
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            return new AppResponseBase(
+                    HttpStatus.NOT_FOUND.value(),
+                    false,
+                    "Không tìm thấy thông tin người dùng",
+                    null,
+                    new AppErrorBase("Not Found", "Không tìm thấy thông tin người dùng")
+            );
+        }
+
+        User user = optionalUser.get();
+
+        if (user.isDeleted() || user.isBlocked()) {
+            return new AppResponseBase(
+                    HttpStatus.FORBIDDEN.value(),
+                    false,
+                    "Tài khoản người dùng không tồn tại hoặc đã bị khoá",
+                    null,
+                    new AppErrorBase("Forbidden", "Tài khoản người dùng không tồn tại hoặc đã bị khoá")
+            );
+        }
+
+        if (!PasswordHandle.verifyPassword(oldPassword, user.getPassword())) {
+            return new AppResponseBase(
+                    HttpStatus.UNAUTHORIZED.value(),
+                    false,
+                    "Mật khẩu hiện tại không chính xác",
+                    Map.of("field", "oldPassword", "message", "Mật khẩu hiện tại không chính xác"),
+                    new AppErrorBase("Unauthorized", "Mật khẩu hiện tại không chính xác")
+            );
+        }
+        String hashedNewPassword = PasswordHandle.hashPassword(newPassword);
+        user.setPassword(hashedNewPassword);
+        user.setUpdated(true);
+
+
+        try {
+            User updatedUser = userRepository.save(user);
+            return new AppResponseBase(
+                    HttpStatus.OK.value(),
+                    true,
+                    "Cập nhật mật khẩu thành công",
+                    updatedUser,
+                    null
+            );
+        } catch (Exception e) {
+            return new AppResponseBase(
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    false,
+                    "Cập nhật mật khẩu thất bại",
+                    null,
+                    new AppErrorBase("Lỗi từ phía server", e.getMessage())
+            );
+        }
+    }
+
 }

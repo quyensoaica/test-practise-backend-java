@@ -83,4 +83,16 @@ public class JwtTokenService {
             throw new RuntimeException(e);
         }
     }
+
+    public String extractUserId(String token) {
+        try {
+            String jwt = token.substring(7); // Remove "Bearer " prefix
+            JWSObject jwsObject = JWSObject.parse(jwt);
+            JWTClaimsSet claims = JWTClaimsSet.parse(jwsObject.getPayload().toJSONObject());
+            return claims.getStringClaim("userId");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 }
