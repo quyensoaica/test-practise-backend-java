@@ -24,6 +24,7 @@ public class Answer {
     @Column(name = "subQuestionId", length = 255, nullable = true)
     private String subQuestionId;
 
+
     @Column(name = "answerContent", columnDefinition = "TEXT", nullable = false)
     private String answerContent;
 

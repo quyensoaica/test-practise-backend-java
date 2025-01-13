@@ -1,10 +1,8 @@
 package com.practise.test.controller;
 
+import com.practise.test.dto.AppData.AppErrorBase;
 import com.practise.test.dto.AppData.AppResponseBase;
-import com.practise.test.dto.authorization.LoginReponseDTO;
-import com.practise.test.dto.authorization.LoginRequestDTO;
-import com.practise.test.dto.authorization.RegisterRequestDTO;
-import com.practise.test.dto.authorization.UpdateMyProfileRequestDTO;
+import com.practise.test.dto.authorization.*;
 import com.practise.test.model.authorization.AccessToken;
 import com.practise.test.model.authorization.TokenPayload;
 import com.practise.test.service.AuthenticateService;
@@ -15,7 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import com.practise.test.dto.AppData.AppResponseBase;
+import com.practise.test.dto.authorization.ChangePasswordRequestDTO;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticateController {
@@ -67,4 +68,33 @@ public class AuthenticateController {
         AppResponseBase appResponseBase = authenticateService.updateMyProfile(userId, updateMyProfileRequestDTO);
         return ResponseEntity.status(appResponseBase.getStatus()).body(appResponseBase);
     }
+
+    @PutMapping("/change-password")
+    public ResponseEntity<AppResponseBase> changePassword(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody ChangePasswordRequestDTO changePasswordRequestDTO) {
+
+        // Extract userId from the Authorization token
+        String userId = jwtTokenService.extractUserId(authorizationHeader);
+        if (userId == null) {
+            AppResponseBase errorResponse = new AppResponseBase(
+                    HttpStatus.FORBIDDEN.value(),
+                    false,
+                    "Unauthorized: Invalid token",
+                    null,
+                    new AppErrorBase("Forbidden", "Invalid token")
+            );
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        }
+
+        AppResponseBase response = authenticateService.changePassword(
+                userId,
+                changePasswordRequestDTO.getOldPassword(),
+                changePasswordRequestDTO.getNewPassword()
+        );
+
+// Trả về ResponseEntity với mã trạng thái và nội dung từ service
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
 }
